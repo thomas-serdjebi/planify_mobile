@@ -1,30 +1,29 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ImageBackground } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import styles from "../styles/LoginScreenStyles"; // Import des styles
+import { useNavigation } from '@react-navigation/native';
+import styles from "../styles/LoginScreenStyles";
 
-// Simulation d'une API avec des utilisateurs fictifs
+
 const users = [
   { email: "test@planify.com", password: "123456" },
   { email: "admin@planify.com", password: "adminpass" },
 ];
 
-// Simulation des messages d'erreur retournés par l'API
+
 const errorMessages = {
   emptyFields: "Veuillez remplir tous les champs.",
   invalidCredentials: "Email ou mot de passe incorrect.",
 };
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const navigation = useNavigation();  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleLogin = () => {
     setError(""); 
-
 
     if (!email || !password) {
       setError(errorMessages.emptyFields);
@@ -35,7 +34,7 @@ export default function LoginScreen() {
 
     if (userExists) {
       console.log("Connexion réussie avec :", email);
-      router.push("/home"); 
+      navigation.navigate('Dashboard'); 
     } else {
       setError(errorMessages.invalidCredentials);
     }
