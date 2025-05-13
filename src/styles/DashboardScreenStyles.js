@@ -142,6 +142,7 @@ export default StyleSheet.create({
   },
   
   calendarIcon: {
+    marginTop:10,
     marginRight: 10, // 📌 Espacement avec le texte
     padding: 8, // 📌 Rendre le bouton plus cliquable
     backgroundColor: "#E0E8F9", // 📌 Fond bleu clair pour mieux ressortir
@@ -196,9 +197,28 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  tourneeCardLate: {
+    backgroundColor: "#FFCDD2", // 🌟 Rouge clair pour indiquer un retard
+    borderColor: "#D32F2F", // Bordure rouge plus foncée
+    borderWidth: 2,
+  },
+  regulariserButton: {
+    backgroundColor: "#D32F2F", // Rouge foncé 🔴
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
   
-  
-  
+  regulariserButtonText: {
+    color: "white", // Texte blanc
+    fontWeight: "bold",
+    fontSize: 14,
+    marginLeft: 8, // Espace entre l'icône et le texte
+  },
   
   
 });

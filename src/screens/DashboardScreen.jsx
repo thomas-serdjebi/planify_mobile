@@ -11,10 +11,11 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from '../styles/DashboardScreenStyles';
 
-const apiBaseUrl = 'http://192.168.2.130:8000/api/tournees';
-const livreurId = 1;
+const apiBaseUrl = 'http://192.168.0.11:8000/api/tournees';
+const livreurId = 14;
 
-const Dashboard = () => {
+const Dashboard = ({navigation}) => {
+
   const [tournees, setTournees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [historiqueVisible, setHistoriqueVisible] = useState(false);
@@ -22,34 +23,39 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const isLateTournee = (tournee) => {
+    return new Date(tournee.date) < new Date(today) && tournee.statut !== "terminée";
+  };
+  
+
   const today = new Date().toISOString().split('T')[0];
 
-  // 📌 Fetch les tournées
   const fetchTournees = async () => {
     setLoading(true);
     try {
       const response = await fetch(`${apiBaseUrl}/all/${livreurId}`);
       if (!response.ok) throw new Error(`Erreur ${response.status}`);
       const data = await response.json();
-
+  
       const sortedTournees = data.sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
         return dateA - dateB || a.creneau.localeCompare(b.creneau);
       });
-
-      setTournees(sortedTournees);
+  
+      const tourneesActives = sortedTournees.filter(t => t.statut !== "terminée" );
+      const tourneesHistoriques = sortedTournees
+        .filter(t => t.statut === "terminéee" )
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); 
+  
+      setTournees(historiqueVisible ? tourneesHistoriques : tourneesActives);
     } catch (error) {
       console.error(`❌ Erreur lors du fetch:`, error);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchTournees();
-  }, []);
-
+  
   const toggleExpand = (id) => {
     setExpandedTournees((prev) => ({
       ...prev,
@@ -75,10 +81,8 @@ const Dashboard = () => {
 
   // 📌 Filtrage des tournées selon historique / future et date choisie
   const displayedTournees = historiqueVisible
-    ? tournees
-        .filter(t => t.date < today)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) 
-    : tournees.filter(isFutureOrToday);
+  ? tournees.filter(t => t.statut !== "Attribuée" && t.statut !== "en cours") // Historique : tout sauf "attribuée" et "en cours"
+  : tournees.filter(t => t.statut === "Attribuée" || t.statut === "en cours"); // Par défaut, on affiche ces statuts
 
   // Appliquer le filtre de date si une date est sélectionnée
   const filteredTournees = selectedDate
@@ -91,6 +95,11 @@ const Dashboard = () => {
     acc[tournee.date].push(tournee);
     return acc;
   }, {});
+
+  useEffect(() => {
+    fetchTournees();
+  }, [historiqueVisible]); // Recharge les tournées quand on bascule entre historique et actif
+  
 
   return (
     <View style={styles.container}>
@@ -144,7 +153,13 @@ const Dashboard = () => {
 
               {/* 📌 Tournées du jour */}
               {groupedTournees[date].map((tournee) => (
-                <View key={tournee.id} style={styles.tourneeCard}>
+                 <View
+                 key={tournee.id}
+                 style={[
+                   styles.tourneeCard,
+                   isLateTournee(tournee) && styles.tourneeCardLate // Appliquer un style rouge si la tournée est en retard
+                 ]}
+                >
                   <View style={styles.tourneeHeader}>
                     <Text style={styles.tourneeCreneau}>
                       Créneau {tournee.creneau} ({tournee.creneau === '1' ? '8h-13h' : '14h-18h'})
@@ -152,11 +167,21 @@ const Dashboard = () => {
 
                     {/* 📌 Bouton Itinéraire */}
                     {isFutureOrToday(tournee) && (
-                      <TouchableOpacity style={styles.itineraryButton}>
-                        <MaterialIcons name="directions" size={20} color="white" />
-                        <Text style={styles.itineraryButtonText}>Itinéraire</Text>
+                      <TouchableOpacity onPress={() => navigation.navigate("Itineraire", { tournee })} style={styles.itineraryButton}>
+                      <MaterialIcons name="directions" size={20} color="white" />
+                      <Text style={styles.itineraryButtonText}>Itinéraire</Text>
                       </TouchableOpacity>
                     )}
+
+                  {isLateTournee(tournee) && (
+                    <TouchableOpacity 
+                      onPress={() => navigation.navigate("Itineraire", { tournee })} 
+                      style={styles.regulariserButton}
+                    >
+                      <MaterialIcons name="warning" size={20} color="white" />
+                      <Text style={styles.regulariserButtonText}>Régulariser</Text>
+                    </TouchableOpacity>
+                  )}
                   </View>
 
                   <Text style={styles.tourneeNumber}>Tournée #{tournee.id}</Text>

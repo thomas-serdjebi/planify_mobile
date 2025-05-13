@@ -1,20 +1,19 @@
 import React from "react";
-import { StatusBar } from "expo-status-bar";
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../src/screens/LoginScreen";
 import DashboardScreen from "../src/screens/DashboardScreen";
+import ItineraireScreen from "../src/screens/ItineraireScreen";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function IndexPage() {
   return (
     <>
-      <StatusBar style="light" />
-        <Stack.Navigator initialRouteName="Dashboard" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Dashboard" component={DashboardScreen} />
-        </Stack.Navigator>
+      <Stack.Navigator initialRouteName="Dashboard" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        <Stack.Screen name="Itineraire" component={ItineraireScreen} />
+      </Stack.Navigator>
     </>
   );
 }
